@@ -1,0 +1,137 @@
+"use client";
+
+import { Copy, Loader2, Save, Sparkles } from "lucide-react";
+import { useState, useTransition } from "react";
+
+import { saveCoverLetterAction } from "@/app/dashboard/actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export function CoverLetterStudio({
+  initialLetters,
+}: {
+  initialLetters: Array<{ id: string; role: string; company: string; tone: string; content: string; jobDetails: string }>;
+}) {
+  const [role, setRole] = useState("");
+  const [company, setCompany] = useState("");
+  const [tone, setTone] = useState("Confident and polished");
+  const [jobDescription, setJobDescription] = useState("");
+  const [content, setContent] = useState(initialLetters[0]?.content ?? "");
+  const [message, setMessage] = useState("");
+  const [isGenerating, startGenerating] = useTransition();
+  const [isSaving, startSaving] = useTransition();
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate a tailored cover letter</CardTitle>
+          <CardDescription>Paste the job brief, set the tone, and let Gemini draft a sharper first pass.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2"><Label>Role</Label><Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Senior Product Manager" /></div>
+            <div className="space-y-2"><Label>Company</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme" /></div>
+          </div>
+          <div className="space-y-2"><Label>Tone</Label><Input value={tone} onChange={(e) => setTone(e.target.value)} /></div>
+          <div className="space-y-2">
+            <Label>Job description</Label>
+            <Textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the job description or key responsibilities here..." className="min-h-[220px]" />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="accent"
+              disabled={isGenerating}
+              onClick={() => {
+                setMessage("");
+                startGenerating(async () => {
+                  const response = await fetch("/api/ai/cover-letter", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ role, company, tone, jobDescription }),
+                  });
+                  const data = await response.json();
+                  if (!response.ok) {
+                    setMessage(data.error ?? "Unable to generate cover letter.");
+                    return;
+                  }
+                  setContent(data.content.trim());
+                  setMessage("Draft generated. Review, tweak, and save when it feels right.");
+                });
+              }}
+            >
+              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Generate draft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigator.clipboard.writeText(content)}
+              disabled={!content}
+            >
+              <Copy className="mr-2 h-4 w-4" />Copy
+            </Button>
+          </div>
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Letter output</CardTitle>
+          <CardDescription>Keep the voice crisp, specific, and aligned to the opportunity.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[480px]" />
+          <div className="flex flex-wrap gap-3">
+            <Button
+              disabled={isSaving || !content}
+              onClick={() => {
+                setMessage("");
+                startSaving(async () => {
+                  try {
+                    await saveCoverLetterAction({ values: { role, company, tone, jobDescription }, content });
+                    setMessage("Cover letter saved.");
+                  } catch (error) {
+                    setMessage(error instanceof Error ? error.message : "Unable to save cover letter.");
+                  }
+                });
+              }}
+            >
+              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save letter
+            </Button>
+          </div>
+          <div className="rounded-[28px] border border-border/70 bg-muted/40 p-4">
+            <h4 className="font-medium">Recent drafts</h4>
+            <div className="mt-4 space-y-3">
+              {initialLetters.length ? (
+                initialLetters.map((letter) => (
+                  <button
+                    key={letter.id}
+                    type="button"
+                    className="w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg"
+                    onClick={() => {
+                      setRole(letter.role);
+                      setCompany(letter.company);
+                      setTone(letter.tone);
+                      setJobDescription(letter.jobDetails);
+                      setContent(letter.content);
+                    }}
+                  >
+                    <p className="font-medium">{letter.role} at {letter.company}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{letter.tone}</p>
+                  </button>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No saved cover letters yet.</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

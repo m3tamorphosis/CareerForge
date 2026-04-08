@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: 248 250 252;
+  --foreground: 15 23 42;
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --primary: 15 23 42;
+  --primary-foreground: 248 250 252;
+  --secondary: 239 246 255;
+  --secondary-foreground: 30 41 59;
+  --accent: 14 165 233;
+  --success: 16 185 129;
+  --warning: 234 179 8;
+  --danger: 239 68 68;
+  --ring: 14 165 233;
+  --radius: 1.5rem;
+}
+
+.dark {
+  --background: 2 6 23;
+  --foreground: 226 232 240;
+  --card: 15 23 42;
+  --card-foreground: 226 232 240;
+  --muted: 15 23 42;
+  --muted-foreground: 148 163 184;
+  --border: 30 41 59;
+  --input: 51 65 85;
+  --primary: 241 245 249;
+  --primary-foreground: 15 23 42;
+  --secondary: 15 23 42;
+  --secondary-foreground: 226 232 240;
+  --accent: 56 189 248;
+  --success: 52 211 153;
+  --warning: 250 204 21;
+  --danger: 248 113 113;
+  --ring: 56 189 248;
+}
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-success: rgb(var(--success));
+  --color-warning: rgb(var(--warning));
+  --color-danger: rgb(var(--danger));
+  --color-ring: rgb(var(--ring));
+  --radius-xl: var(--radius);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  background-image:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.10), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 28%);
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  @apply outline-none ring-0;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.22);
+}
+
+.glass {
+  @apply border border-white/10 bg-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:bg-slate-950/50;
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent;
+}
+
+.shadow-glow {
+  box-shadow: 0 20px 100px rgba(14, 165, 233, 0.12);
+}
