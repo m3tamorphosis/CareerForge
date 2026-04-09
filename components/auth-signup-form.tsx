@@ -40,25 +40,36 @@ export function SignUpForm() {
             setErrors({});
 
             startTransition(async () => {
-              const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password }),
-              });
+              try {
+                const response = await fetch("/api/auth/register", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name, email, password }),
+                });
 
-              const data = await response.json();
-              if (!response.ok) {
-                if (data.field && typeof data.field === "string") {
-                  setErrors({ [data.field]: data.error ?? "Please check this field." });
-                } else {
-                  setErrors({ form: data.error ?? "Unable to create your account." });
+                const data = await response.json();
+                if (!response.ok) {
+                  if (data.field && typeof data.field === "string") {
+                    setErrors({ [data.field]: data.error ?? "Please check this field." });
+                  } else {
+                    setErrors({ form: data.error ?? "Unable to create your account." });
+                  }
+                  return;
                 }
-                return;
-              }
 
-              await signIn("credentials", { email, password, redirect: false });
-              router.push("/dashboard");
-              router.refresh();
+                const signInResult = await signIn("credentials", { email, password, redirect: false });
+                if (signInResult?.error) {
+                  setErrors({ form: signInResult.error });
+                  return;
+                }
+
+                router.push("/dashboard");
+                router.refresh();
+              } catch {
+                setErrors({
+                  form: "We could not reach the server. Make sure the app is running and try again.",
+                });
+              }
             });
           }}
         >
