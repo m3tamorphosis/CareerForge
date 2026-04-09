@@ -11,7 +11,7 @@ CareerForge AI is a production-ready SaaS application for modern job seekers who
 - Framer Motion
 - Auth.js with credentials auth
 - Prisma ORM
-- PostgreSQL (Supabase)
+- PostgreSQL
 - Gemini API
 - Vercel-ready deployment
 
@@ -33,14 +33,11 @@ CareerForge AI is a production-ready SaaS application for modern job seekers who
 Copy `.env.example` to `.env` and fill in:
 
 ```env
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/careerforge?sslmode=require"
 AUTH_SECRET="replace-with-a-long-random-secret"
 GEMINI_API_KEY="your-gemini-api-key"
 NEXTAUTH_URL="http://localhost:3000"
 ```
-
-Supabase path for the database URL:
-`Project Settings -> Database -> Connection string -> URI`
 
 ## Local Setup
 
@@ -56,7 +53,7 @@ npm install
 npx prisma generate
 ```
 
-3. Push the schema to your Supabase Postgres database:
+3. Push the schema to your PostgreSQL database:
 
 ```bash
 npx prisma db push
@@ -82,13 +79,6 @@ npm run dev
 - Cover letter generation calls `POST /api/ai/cover-letter`.
 - If `GEMINI_API_KEY` is missing, the app returns a safe fallback message instead of breaking.
 
-## Supabase Notes
-
-- Prisma only needs a valid PostgreSQL `DATABASE_URL` from Supabase.
-- If you hit connection issues, prefer the direct connection string over a pooled one.
-- Keep SSL enabled in the connection string.
-- You can find the connection string in `Project Settings -> Database -> Connection string -> URI`.
-
 ## Database Models
 
 - `User`
@@ -102,7 +92,7 @@ npm run dev
 
 The app is ready for Vercel deployment.
 
-1. Create a Supabase PostgreSQL database.
+1. Create a PostgreSQL database.
 2. Add all environment variables in Vercel.
 3. Run `npx prisma db push` against production.
 4. Deploy.

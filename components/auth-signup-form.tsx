@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,12 +11,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type FieldErrors = {
+  name?: string;
+  email?: string;
+  password?: string;
+  form?: string;
+};
+
 export function SignUpForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -30,7 +37,7 @@ export function SignUpForm() {
           className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
-            setError("");
+            setErrors({});
 
             startTransition(async () => {
               const response = await fetch("/api/auth/register", {
@@ -41,7 +48,11 @@ export function SignUpForm() {
 
               const data = await response.json();
               if (!response.ok) {
-                setError(data.error ?? "Unable to create your account.");
+                if (data.field && typeof data.field === "string") {
+                  setErrors({ [data.field]: data.error ?? "Please check this field." });
+                } else {
+                  setErrors({ form: data.error ?? "Unable to create your account." });
+                }
                 return;
               }
 
@@ -54,16 +65,25 @@ export function SignUpForm() {
           <div className="space-y-2">
             <Label htmlFor="signup-name">Full name</Label>
             <Input id="signup-name" value={name} onChange={(e) => setName(e.target.value)} required />
+            {errors.name ? <p className="text-sm text-rose-500">{errors.name}</p> : null}
           </div>
           <div className="space-y-2">
             <Label htmlFor="signup-email">Email</Label>
             <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            {errors.email ? <p className="text-sm text-rose-500">{errors.email}</p> : null}
           </div>
           <div className="space-y-2">
             <Label htmlFor="signup-password">Password</Label>
             <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <p className="text-xs text-muted-foreground">Use at least 8 characters.</p>
+            {errors.password ? <p className="text-sm text-rose-500">{errors.password}</p> : null}
           </div>
-          {error ? <p className="text-sm text-rose-500">{error}</p> : null}
+          {errors.form ? (
+            <div className="flex items-start gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/8 p-3 text-sm text-rose-500">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{errors.form}</p>
+            </div>
+          ) : null}
           <Button className="w-full" type="submit" variant="accent" disabled={isPending}>
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start free"}
           </Button>

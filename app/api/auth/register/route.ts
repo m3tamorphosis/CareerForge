@@ -1,5 +1,6 @@
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { signUpSchema } from "@/lib/validations";
@@ -27,6 +28,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ id: user.id, success: true });
   } catch (error) {
+    if (error instanceof ZodError) {
+      const issue = error.issues[0];
+      return NextResponse.json(
+        {
+          error: issue?.message ?? "Please check your details and try again.",
+          field: issue?.path?.[0] ?? null,
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to register account." }, { status: 400 });
   }
 }
