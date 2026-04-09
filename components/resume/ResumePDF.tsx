@@ -22,7 +22,7 @@ export function ResumePDF({ values }: ResumePDFProps) {
   return (
     <div className="resume-pdf-shell">
       <article className="resume-pdf-page">
-        <header className="resume-pdf-header">
+        <header className="resume-pdf-header" style={{ textAlign: "center" }}>
           <h1 className="resume-pdf-name">{resume.name}</h1>
           <p className="resume-pdf-role">{resume.role}</p>
           {contact.length ? <p className="resume-pdf-contact">{contact.join(" | ")}</p> : null}
@@ -118,3 +118,5 @@ export function ResumePDF({ values }: ResumePDFProps) {
     </div>
   );
 }
+
+

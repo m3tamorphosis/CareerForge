@@ -12,7 +12,7 @@ export const resumePdfStyles = `
     padding: 0;
     overflow: visible;
     background: #ffffff;
-    color: #334155;
+    color: #000000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -50,7 +50,7 @@ export const resumePdfStyles = `
     padding: 0;
     overflow: visible;
     background: #ffffff;
-    color: #334155;
+    color: #000000;
   }
 
   .resume-pdf-shell {
@@ -65,19 +65,20 @@ export const resumePdfStyles = `
     max-width: 800px;
     margin: 0 auto;
     background: #ffffff;
-    color: #334155;
+    color: #000000;
   }
 
   .resume-pdf-header {
     margin: 0 0 22px;
     padding: 0;
+    text-align: center;
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
   .resume-pdf-name {
     margin: 0;
-    color: #0f172a;
+    color: #000000;
     font-size: 30px;
     line-height: 1.02;
     font-weight: 750;
@@ -86,7 +87,7 @@ export const resumePdfStyles = `
 
   .resume-pdf-role {
     margin: 5px 0 0;
-    color: #334155;
+    color: #000000;
     font-size: 15px;
     line-height: 1.4;
     font-weight: 500;
@@ -94,7 +95,7 @@ export const resumePdfStyles = `
 
   .resume-pdf-contact {
     margin: 8px 0 0;
-    color: #64748b;
+    color: #000000;
     font-size: 11.5px;
     line-height: 1.5;
   }
@@ -107,7 +108,7 @@ export const resumePdfStyles = `
 
   .resume-pdf-section-heading {
     margin: 0;
-    color: #475569;
+    color: #000000;
     font-size: 12px;
     line-height: 1.15;
     font-weight: 650;
@@ -118,11 +119,11 @@ export const resumePdfStyles = `
   .resume-pdf-section-rule {
     height: 1px;
     margin: 6px 0 9px;
-    background: #e5e7eb;
+    background: #000000;
   }
 
   .resume-pdf-section-body {
-    color: #334155;
+    color: #000000;
     font-size: 11.5px;
     line-height: 1.52;
   }
@@ -145,12 +146,12 @@ export const resumePdfStyles = `
   }
 
   .resume-pdf-skill-label {
-    color: #0f172a;
+    color: #000000;
     font-weight: 650;
   }
 
   .resume-pdf-skill-value {
-    color: #334155;
+    color: #000000;
   }
 
   .resume-pdf-stack {
@@ -176,7 +177,7 @@ export const resumePdfStyles = `
 
   .resume-pdf-entry-title {
     margin: 0;
-    color: #0f172a;
+    color: #000000;
     font-size: 12.5px;
     line-height: 1.3;
     font-weight: 700;
@@ -184,7 +185,7 @@ export const resumePdfStyles = `
 
   .resume-pdf-entry-company {
     margin: 1px 0 0;
-    color: #334155;
+    color: #000000;
     font-size: 11.5px;
     line-height: 1.42;
   }
@@ -193,7 +194,7 @@ export const resumePdfStyles = `
     margin: 0;
     flex-shrink: 0;
     white-space: nowrap;
-    color: #64748b;
+    color: #000000;
     font-size: 11px;
     line-height: 1.3;
     text-align: right;
@@ -205,6 +206,7 @@ export const resumePdfStyles = `
   }
 
   .resume-pdf-bullets li {
+    color: #000000;
     margin: 0 0 4px;
     line-height: 1.5;
     page-break-inside: avoid;
@@ -213,13 +215,13 @@ export const resumePdfStyles = `
 
   .resume-pdf-project-description {
     margin: 3px 0 0;
-    color: #334155;
+    color: #000000;
     line-height: 1.48;
   }
 
   .resume-pdf-project-stack {
     margin: 3px 0 0;
-    color: #64748b;
+    color: #000000;
     font-size: 11px;
     line-height: 1.45;
   }
@@ -233,3 +235,11 @@ export const resumePdfStyles = `
     break-inside: avoid;
   }
 `;
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Expand, FileText, Loader2, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useState, useTransition } from "react";
@@ -16,12 +16,23 @@ import { exportResumeToPDF } from "@/lib/exportResumeToPDF";
 import { cn } from "@/lib/utils";
 import type { ResumeFormValues } from "@/types";
 
-const bulletActions = ["improve", "shorten", "professionalize", "achievement-focused"] as const;
+const bulletActions = [
+  { value: "improve", label: "Improve" },
+  { value: "shorten", label: "Shorten" },
+  { value: "professionalize", label: "Professionalize" },
+  { value: "achievement-focused", label: "Achievement" },
+] as const;
 
 const fieldClass =
-  "h-10 rounded-xl border-white/7 bg-slate-950/45 px-3.5 text-sm text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:border-sky-400/40 focus-visible:ring-2 focus-visible:ring-sky-400/10";
+  "h-10 w-full rounded-xl border-white/6 bg-slate-950/42 px-3.5 text-sm text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:border-sky-400/35 focus-visible:ring-2 focus-visible:ring-sky-400/10";
 const textareaClass =
-  "rounded-xl border-white/7 bg-slate-950/45 px-3.5 py-3 text-sm leading-6 text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:border-sky-400/40 focus-visible:ring-2 focus-visible:ring-sky-400/10 resize-y";
+  "w-full rounded-xl border-white/6 bg-slate-950/42 px-3.5 py-2.5 text-sm leading-6 text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:border-sky-400/35 focus-visible:ring-2 focus-visible:ring-sky-400/10 resize-y";
+const tertiaryButtonClass =
+  "h-8 shrink-0 rounded-full border border-white/6 bg-white/[0.03] px-3 text-xs font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white";
+const subtleActionClass =
+  "h-8 shrink-0 rounded-full px-3 text-xs text-slate-400 hover:bg-white/[0.05] hover:text-slate-100";
+const aiActionClass =
+  "h-7 shrink-0 rounded-full border border-white/6 bg-white/[0.02] px-2 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white";
 
 type SectionProps = {
   eyebrow?: string;
@@ -35,13 +46,13 @@ type SectionProps = {
 function EditorSection({ eyebrow, title, description, actions, children, className }: SectionProps) {
   return (
     <section className={cn("space-y-5 border-t border-white/6 pt-8 first:border-t-0 first:pt-0", className)}>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+      <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="min-w-0 flex-1">
           {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300/85">{eyebrow}</p> : null}
           <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">{title}</h2>
           {description ? <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">{description}</p> : null}
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {actions ? <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">{actions}</div> : null}
       </div>
       {children}
     </section>
@@ -50,10 +61,10 @@ function EditorSection({ eyebrow, title, description, actions, children, classNa
 
 function Field({ label, hint, className, children }: { label: string; hint?: string; className?: string; children: React.ReactNode }) {
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">{label}</Label>
+    <div className={cn("min-w-0 space-y-2", className)}>
+      <Label className="block text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">{label}</Label>
       {children}
-      {hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
+      {hint ? <p className="text-xs leading-5 text-slate-500">{hint}</p> : null}
     </div>
   );
 }
@@ -78,22 +89,13 @@ function ExperienceRole({
   onRemove: () => void;
 }) {
   return (
-    <motion.div
-      layout
-      className="rounded-[22px] bg-white/[0.025] px-4 py-4 ring-1 ring-white/6 backdrop-blur-sm"
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+    <motion.div layout className="rounded-[20px] bg-white/[0.02] px-4 py-4 ring-1 ring-white/5">
+      <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Experience item</p>
           <p className="mt-1 text-sm text-slate-300">Structure the role first, then tighten the evidence beneath it.</p>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-full px-3 text-xs text-slate-400 hover:bg-white/[0.05] hover:text-slate-100"
-          onClick={onRemove}
-        >
+        <Button type="button" variant="ghost" size="sm" className={subtleActionClass} onClick={onRemove}>
           <Trash2 className="mr-1.5 h-3.5 w-3.5" />
           Remove role
         </Button>
@@ -118,49 +120,54 @@ function ExperienceRole({
         {item.bullets.map((bullet, bulletIndex) => {
           const key = `${item.id}-${bulletIndex}`;
           return (
-            <div key={key} className="space-y-2.5 rounded-2xl bg-slate-950/28 px-3 py-3 ring-1 ring-white/5">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Bullet {bulletIndex + 1}</p>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {bulletActions.map((action) => (
-                    <Button
-                      key={action}
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 rounded-full border border-white/6 bg-white/[0.03] px-3 text-[11px] font-medium capitalize text-slate-300 hover:bg-white/[0.06]"
-                      disabled={aiLoadingKey === `${key}-${action}`}
-                      onClick={async () => {
-                        setAiLoadingKey(`${key}-${action}`);
-                        setMessage("");
-                        const response = await fetch("/api/ai/resume-bullets", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ bullet, action, role: item.role || values.personal.role }),
-                        });
-                        const data = await response.json();
-                        setAiLoadingKey(null);
+            <div key={key} className="space-y-3 rounded-2xl bg-slate-950/18 px-3.5 py-3 ring-1 ring-white/4">
+              <div className="flex min-w-0 flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+                <p className="shrink-0 text-xs font-medium text-slate-400">Bullet {bulletIndex + 1}</p>
+                <div className="min-w-0 xl:flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5 xl:flex-nowrap xl:justify-end">
+                    {bulletActions.map((action) => (
+                      <Button
+                        key={action.value}
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className={aiActionClass}
+                        disabled={aiLoadingKey === `${key}-${action.value}`}
+                        onClick={async () => {
+                          setAiLoadingKey(`${key}-${action.value}`);
+                          setMessage("");
+                          try {
+                            const response = await fetch("/api/ai/resume-bullets", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ bullet, action: action.value, role: item.role || values.personal.role }),
+                            });
+                            const data = await response.json();
 
-                        if (!response.ok) {
-                          setMessage(data.error ?? "Unable to improve bullet.");
-                          return;
-                        }
+                            if (!response.ok) {
+                              setMessage(data.error ?? "Unable to improve bullet.");
+                              return;
+                            }
 
-                        const nextBullets = [...item.bullets];
-                        nextBullets[bulletIndex] = data.suggestion.trim();
-                        updateExperience(index, "bullets", nextBullets);
-                        setMessage(`AI ${action} applied.`);
-                      }}
-                    >
-                      {aiLoadingKey === `${key}-${action}` ? <Loader2 className="h-3 w-3 animate-spin" /> : action}
-                    </Button>
-                  ))}
+                            const nextBullets = [...item.bullets];
+                            nextBullets[bulletIndex] = data.suggestion.trim();
+                            updateExperience(index, "bullets", nextBullets);
+                            setMessage(`AI ${action.value} applied.`);
+                          } catch (error) {
+                            setMessage(error instanceof Error ? error.message : "Unable to improve bullet.");
+                          } finally {
+                            setAiLoadingKey(null);
+                          }
+                        }}
+                      >
+                        {aiLoadingKey === `${key}-${action.value}` ? <Loader2 className="h-3 w-3 animate-spin" /> : action.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <Textarea
-                className={cn(textareaClass, "min-h-[88px] bg-transparent")}
+                className={cn(textareaClass, "min-h-[84px] bg-transparent")}
                 value={bullet}
                 onChange={(e) => {
                   const nextBullets = [...item.bullets];
@@ -177,7 +184,7 @@ function ExperienceRole({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 rounded-full px-3 text-xs text-slate-300 hover:bg-white/[0.05]"
+            className={subtleActionClass}
             onClick={() => updateExperience(index, "bullets", [...item.bullets, ""])}
           >
             <Plus className="mr-1.5 h-3.5 w-3.5" />
@@ -196,6 +203,7 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
   const [isPending, startTransition] = useTransition();
   const [aiLoadingKey, setAiLoadingKey] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [previewExpanded, setPreviewExpanded] = useState(false);
 
   const updateExperience = (index: number, field: keyof ResumeFormValues["experience"][number], value: string | string[]) => {
     setValues((current) => {
@@ -214,220 +222,283 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
-      <div className="space-y-6">
-        <section className="rounded-[28px] border border-white/7 bg-slate-950/55 px-6 py-6 shadow-[0_20px_70px_rgba(2,6,23,0.26)] backdrop-blur-xl">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-300/85">Resume Builder</p>
-              <h1 className="mt-2 text-[1.9rem] font-semibold tracking-tight text-white">Build a cleaner, sharper narrative.</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                Edit the substance here, keep the structure light, and export a recruiter-ready document without dragging the app UI into the final output.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="accent"
-                disabled={isPending}
-                className="h-10 rounded-xl px-4.5 shadow-[0_12px_28px_rgba(14,165,233,0.18)]"
-                onClick={() => {
-                  setMessage("");
-                  startTransition(async () => {
-                    try {
-                      const result = await saveResumeAction({ id: resumeId, values });
-                      setMessage("Resume saved successfully.");
-                      if (!resumeId) {
-                        router.push(`/dashboard/resumes/${result.id}`);
-                      }
-                      router.refresh();
-                    } catch (error) {
-                      setMessage(error instanceof Error ? error.message : "Unable to save resume.");
-                    }
-                  });
-                }}
-              >
-                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                Save resume
-              </Button>
-              <Button
-                variant="outline"
-                className="h-10 rounded-xl border-white/7 bg-white/[0.03] px-4.5 text-slate-200 hover:bg-white/[0.05]"
-                onClick={async () => {
-                  setMessage("");
-                  try {
-                    await exportResumeToPDF(values, `${values.title || "careerforge-resume"}.pdf`);
-                    setMessage("PDF exported successfully.");
-                  } catch (error) {
-                    setMessage(error instanceof Error ? error.message : "Unable to export resume.");
-                  }
-                }}
-              >
-                Export PDF
-              </Button>
-            </div>
-          </div>
-          {message ? <p className="mt-4 text-sm text-slate-400">{message}</p> : null}
-        </section>
-
-        <div className="rounded-[28px] border border-white/6 bg-white/[0.025] px-6 py-6 shadow-[0_16px_50px_rgba(2,6,23,0.16)] backdrop-blur-sm">
-          <div className="space-y-8">
-            <EditorSection
-              eyebrow="Identity"
-              title="Core details"
-              description="Keep the top of the resume clear, calm, and instantly scannable."
-            >
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Resume title" className="md:col-span-2">
-                  <Input className={fieldClass} value={values.title} onChange={(e) => setValues({ ...values, title: e.target.value })} />
-                </Field>
-                <Field label="Full name">
-                  <Input className={fieldClass} value={values.personal.fullName} onChange={(e) => setValues({ ...values, personal: { ...values.personal, fullName: e.target.value } })} />
-                </Field>
-                <Field label="Target role">
-                  <Input className={fieldClass} value={values.personal.role} onChange={(e) => setValues({ ...values, personal: { ...values.personal, role: e.target.value } })} />
-                </Field>
-                <Field label="Email">
-                  <Input className={fieldClass} type="email" value={values.personal.email} onChange={(e) => setValues({ ...values, personal: { ...values.personal, email: e.target.value } })} />
-                </Field>
-                <Field label="Phone">
-                  <Input className={fieldClass} value={values.personal.phone} onChange={(e) => setValues({ ...values, personal: { ...values.personal, phone: e.target.value } })} />
-                </Field>
-                <Field label="Location">
-                  <Input className={fieldClass} value={values.personal.location} onChange={(e) => setValues({ ...values, personal: { ...values.personal, location: e.target.value } })} />
-                </Field>
-                <Field label="Website">
-                  <Input className={fieldClass} value={values.personal.website} onChange={(e) => setValues({ ...values, personal: { ...values.personal, website: e.target.value } })} />
-                </Field>
-                <Field label="Professional summary" className="md:col-span-2">
-                  <Textarea className={cn(textareaClass, "min-h-[132px]")} value={values.summary} onChange={(e) => setValues({ ...values, summary: e.target.value })} />
-                </Field>
+    <>
+      <div className="grid gap-6 2xl:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)] xl:grid-cols-[minmax(0,1fr)_minmax(440px,0.98fr)]">
+        <div className="min-w-0 space-y-6">
+          <section className="rounded-[28px] border border-white/7 bg-slate-950/55 px-6 py-6 shadow-[0_20px_70px_rgba(2,6,23,0.26)] backdrop-blur-xl">
+            <div className="flex min-w-0 flex-col gap-5 2xl:flex-row 2xl:items-start 2xl:justify-between">
+              <div className="min-w-0 flex-1 max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-300/85">Resume Builder</p>
+                <h1 className="mt-2 text-[1.9rem] font-semibold tracking-tight text-white">Build a cleaner, sharper narrative.</h1>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Edit the substance here, keep the structure light, and export a recruiter-ready document without dragging the app UI into the final output.
+                </p>
               </div>
-            </EditorSection>
-
-            <EditorSection
-              eyebrow="Narrative"
-              title="Experience"
-              description="Treat each role like an edited story: compact structure, crisp bullets, and fast AI assistance when you need it."
-              actions={
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-9 rounded-xl border-white/7 bg-white/[0.03] px-4 text-slate-200 hover:bg-white/[0.05]"
-                  onClick={() =>
-                    setValues((current) => ({
-                      ...current,
-                      experience: [
-                        ...current.experience,
-                        { id: crypto.randomUUID(), company: "", role: "", startDate: "", endDate: "", bullets: [""] },
-                      ],
-                    }))
-                  }
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add role
-                </Button>
-              }
-            >
-              <div className="space-y-4">
-                {values.experience.map((item, index) => (
-                  <ExperienceRole
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    values={values}
-                    aiLoadingKey={aiLoadingKey}
-                    setAiLoadingKey={setAiLoadingKey}
-                    setMessage={setMessage}
-                    updateExperience={updateExperience}
-                    onRemove={() =>
-                      setValues((current) => ({
-                        ...current,
-                        experience: current.experience.filter((entry) => entry.id !== item.id),
-                      }))
-                    }
-                  />
-                ))}
-              </div>
-            </EditorSection>
-
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-              <EditorSection
-                eyebrow="Credentials"
-                title="Education"
-                description="Keep credentials concise and neatly stacked."
-                actions={
+              <div className="flex min-w-0 flex-col gap-3 2xl:max-w-[320px] 2xl:items-end">
+                <div className="flex flex-wrap items-center gap-2 2xl:justify-end">
                   <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 rounded-full px-3 text-xs text-slate-300 hover:bg-white/[0.05]"
-                    onClick={() =>
-                      setValues((current) => ({
-                        ...current,
-                        education: [...current.education, { id: crypto.randomUUID(), school: "", degree: "", year: "" }],
-                      }))
-                    }
+                    variant="outline"
+                    className="h-10 rounded-xl border-white/7 bg-white/[0.03] px-4.5 text-slate-200 hover:bg-white/[0.05]"
+                    onClick={async () => {
+                      setMessage("");
+                      try {
+                        await exportResumeToPDF(values, `${values.title || "careerforge-resume"}.pdf`);
+                        setMessage("PDF exported successfully.");
+                      } catch (error) {
+                        setMessage(error instanceof Error ? error.message : "Unable to export resume.");
+                      }
+                    }}
                   >
-                    <Plus className="mr-1.5 h-3.5 w-3.5" />
-                    Add
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export PDF
                   </Button>
-                }
-                className="border-t-0 pt-0"
+                  <Button
+                    variant="accent"
+                    disabled={isPending}
+                    className="h-10 rounded-xl px-4.5 shadow-[0_12px_28px_rgba(14,165,233,0.18)]"
+                    onClick={() => {
+                      setMessage("");
+                      startTransition(async () => {
+                        try {
+                          const result = await saveResumeAction({ id: resumeId, values });
+                          setMessage("Resume saved successfully.");
+                          if (!resumeId) {
+                            router.push(`/dashboard/resumes/${result.id}`);
+                          }
+                          router.refresh();
+                        } catch (error) {
+                          setMessage(error instanceof Error ? error.message : "Unable to save resume.");
+                        }
+                      });
+                    }}
+                  >
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Save resume
+                  </Button>
+                </div>
+                <p className="max-w-sm text-xs text-slate-500 2xl:text-right">Save keeps your latest edits synced. Export generates the recruiter-ready PDF.</p>
+              </div>
+            </div>
+            {message ? <p className="mt-4 text-sm text-slate-400">{message}</p> : null}
+          </section>
+
+          <div className="rounded-[28px] border border-white/6 bg-white/[0.025] px-6 py-6 shadow-[0_16px_50px_rgba(2,6,23,0.16)] backdrop-blur-sm">
+            <div className="space-y-8">
+              <EditorSection
+                eyebrow="Identity"
+                title="Core details"
+                description="Keep the top of the resume clear, calm, and instantly scannable."
               >
-                <div className="space-y-3">
-                  {values.education.map((item, index) => (
-                    <div key={item.id} className="rounded-[20px] bg-white/[0.025] px-4 py-4 ring-1 ring-white/6">
-                      <div className="grid gap-3">
-                        <Field label="School">
-                          <Input className={fieldClass} value={item.school} onChange={(e) => updateEducation(index, "school", e.target.value)} />
-                        </Field>
-                        <Field label="Degree">
-                          <Input className={fieldClass} value={item.degree} onChange={(e) => updateEducation(index, "degree", e.target.value)} />
-                        </Field>
-                        <Field label="Year">
-                          <Input className={fieldClass} value={item.year} onChange={(e) => updateEducation(index, "year", e.target.value)} />
-                        </Field>
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Resume title" className="md:col-span-2">
+                    <Input className={fieldClass} value={values.title} onChange={(e) => setValues({ ...values, title: e.target.value })} />
+                  </Field>
+                  <Field label="Full name">
+                    <Input className={fieldClass} value={values.personal.fullName} onChange={(e) => setValues({ ...values, personal: { ...values.personal, fullName: e.target.value } })} />
+                  </Field>
+                  <Field label="Target role">
+                    <Input className={fieldClass} value={values.personal.role} onChange={(e) => setValues({ ...values, personal: { ...values.personal, role: e.target.value } })} />
+                  </Field>
+                  <Field label="Email">
+                    <Input className={fieldClass} type="email" value={values.personal.email} onChange={(e) => setValues({ ...values, personal: { ...values.personal, email: e.target.value } })} />
+                  </Field>
+                  <Field label="Phone">
+                    <Input className={fieldClass} value={values.personal.phone} onChange={(e) => setValues({ ...values, personal: { ...values.personal, phone: e.target.value } })} />
+                  </Field>
+                  <Field label="Location">
+                    <Input className={fieldClass} value={values.personal.location} onChange={(e) => setValues({ ...values, personal: { ...values.personal, location: e.target.value } })} />
+                  </Field>
+                  <Field label="Website">
+                    <Input className={fieldClass} value={values.personal.website} onChange={(e) => setValues({ ...values, personal: { ...values.personal, website: e.target.value } })} />
+                  </Field>
+                  <Field label="Professional summary" className="md:col-span-2">
+                    <Textarea className={cn(textareaClass, "min-h-[128px]")} value={values.summary} onChange={(e) => setValues({ ...values, summary: e.target.value })} />
+                  </Field>
                 </div>
               </EditorSection>
 
               <EditorSection
-                eyebrow="Keywords"
-                title="Skills"
-                description="Keep the list recruiter-readable and easy to regroup later."
-                className="border-t-0 pt-0"
-              >
-                <Field label="Core skills" hint="Example: TypeScript, Next.js, PostgreSQL, Product Strategy">
-                  <Textarea
-                    className={cn(textareaClass, "min-h-[242px]")}
-                    value={values.skills.join(", ")}
-                    onChange={(e) =>
-                      setValues({
-                        ...values,
-                        skills: e.target.value.split(",").map((skill) => skill.trim()).filter(Boolean),
-                      })
+                eyebrow="Narrative"
+                title="Experience"
+                description="Treat each role like an edited story: compact structure, crisp bullets, and fast AI assistance when you need it."
+                actions={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 rounded-xl border-white/7 bg-white/[0.03] px-4 text-slate-200 hover:bg-white/[0.05]"
+                    onClick={() =>
+                      setValues((current) => ({
+                        ...current,
+                        experience: [
+                          ...current.experience,
+                          { id: crypto.randomUUID(), company: "", role: "", startDate: "", endDate: "", bullets: [""] },
+                        ],
+                      }))
                     }
-                  />
-                </Field>
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add role
+                  </Button>
+                }
+              >
+                <div className="space-y-4">
+                  {values.experience.map((item, index) => (
+                    <ExperienceRole
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      values={values}
+                      aiLoadingKey={aiLoadingKey}
+                      setAiLoadingKey={setAiLoadingKey}
+                      setMessage={setMessage}
+                      updateExperience={updateExperience}
+                      onRemove={() =>
+                        setValues((current) => ({
+                          ...current,
+                          experience: current.experience.filter((entry) => entry.id !== item.id),
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
               </EditorSection>
+
+              <div className="grid gap-6 2xl:grid-cols-[minmax(0,0.98fr)_minmax(0,1.02fr)]">
+                <EditorSection
+                  eyebrow="Credentials"
+                  title="Education"
+                  description="Keep credentials concise and easy to scan at a glance."
+                  actions={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={tertiaryButtonClass}
+                      onClick={() =>
+                        setValues((current) => ({
+                          ...current,
+                          education: [...current.education, { id: crypto.randomUUID(), school: "", degree: "", year: "" }],
+                        }))
+                      }
+                    >
+                      <Plus className="mr-1.5 h-3.5 w-3.5" />
+                      Add education
+                    </Button>
+                  }
+                  className="border-t-0 pt-0"
+                >
+                  <div className="space-y-3">
+                    {values.education.map((item, index) => (
+                      <div key={item.id} className="rounded-[18px] bg-white/[0.02] px-4 py-4 ring-1 ring-white/5">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                          <Field label="School">
+                            <Input className={fieldClass} value={item.school} onChange={(e) => updateEducation(index, "school", e.target.value)} />
+                          </Field>
+                          <Field label="Degree">
+                            <Input className={fieldClass} value={item.degree} onChange={(e) => updateEducation(index, "degree", e.target.value)} />
+                          </Field>
+                          <Field label="Year">
+                            <Input className={fieldClass} value={item.year} onChange={(e) => updateEducation(index, "year", e.target.value)} />
+                          </Field>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </EditorSection>
+
+                <EditorSection
+                  eyebrow="Keywords"
+                  title="Skills"
+                  description="Keep the list recruiter-readable and easy to regroup later."
+                  className="border-t-0 pt-0"
+                >
+                  <div className="min-w-0 space-y-3.5">
+                    <Field label="Core skills">
+                      <Textarea
+                        className={cn(textareaClass, "min-h-[150px]")}
+                        value={values.skills.join(", ")}
+                        onChange={(e) =>
+                          setValues({
+                            ...values,
+                            skills: e.target.value.split(",").map((skill) => skill.trim()).filter(Boolean),
+                          })
+                        }
+                      />
+                    </Field>
+                    <p className="text-xs leading-5 text-slate-500">Example: TypeScript, Next.js, PostgreSQL, Product Strategy</p>
+                    {values.skills.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {values.skills.slice(0, 16).map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full border border-white/6 bg-white/[0.03] px-2.5 py-1 text-xs text-slate-300"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </EditorSection>
+              </div>
             </div>
           </div>
         </div>
+
+        <div className="min-w-0 space-y-4 xl:sticky xl:top-4 xl:self-start">
+          <Card className="overflow-hidden border-white/7 bg-slate-950/45 shadow-[0_18px_60px_rgba(2,6,23,0.24)]">
+            <CardHeader className="border-b border-white/6 pb-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <CardTitle className="text-lg text-white">Live preview</CardTitle>
+                  <CardDescription className="text-slate-400">A larger document surface that stays closely aligned with the exported PDF.</CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 shrink-0 rounded-full border-white/7 bg-white/[0.03] px-3 text-xs text-slate-200 hover:bg-white/[0.05]"
+                  onClick={() => setPreviewExpanded(true)}
+                >
+                  <Expand className="mr-1.5 h-3.5 w-3.5" />
+                  Expand
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4">
+              <ResumePreview values={deferredValues} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-        <Card className="overflow-hidden border-white/7 bg-slate-950/45 shadow-[0_18px_60px_rgba(2,6,23,0.24)]">
-          <CardHeader className="border-b border-white/6 pb-4">
-            <CardTitle className="text-lg text-white">Live preview</CardTitle>
-            <CardDescription className="text-slate-400">A document surface that stays closely aligned with the exported PDF.</CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5">
-            <ResumePreview values={deferredValues} />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      {previewExpanded ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/88 p-4 backdrop-blur-md sm:p-6">
+          <div className="flex h-full w-full max-w-[1600px] flex-col rounded-[32px] border border-white/10 bg-slate-950/92 shadow-[0_30px_120px_rgba(2,6,23,0.5)]">
+            <div className="flex items-center justify-between gap-4 border-b border-white/8 px-5 py-4 sm:px-6">
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-white">Focus preview</h2>
+                <p className="text-sm text-slate-400">A larger, live-updating view of the same exported resume page.</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-9 shrink-0 rounded-full px-3 text-slate-300 hover:bg-white/[0.05] hover:text-white"
+                onClick={() => setPreviewExpanded(false)}
+              >
+                <X className="mr-1.5 h-4 w-4" />
+                Close
+              </Button>
+            </div>
+            <div className="min-h-0 flex-1 p-4 sm:p-6">
+              <ResumePreview values={deferredValues} mode="focus" previewId="resume-preview-focus" />
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
+
+
