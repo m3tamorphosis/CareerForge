@@ -1,79 +1,142 @@
-import { Mail, MapPin, Phone, Sparkles } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
+import { normalizeResumeForPDF } from "@/lib/resume-pdf";
 import type { ResumeFormValues } from "@/types";
 
-export function ResumePreview({ values, previewId = "resume-preview" }: { values: ResumeFormValues; previewId?: string }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div id={previewId} className="rounded-[32px] bg-white p-8 text-slate-900 shadow-2xl shadow-slate-950/10">
-      <div className="flex flex-col gap-6">
-        <div className="border-b border-slate-200 pb-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight">{values.personal.fullName}</h1>
-              <p className="mt-2 text-base text-slate-600">{values.personal.role}</p>
-            </div>
-            <Badge className="gap-2 self-start bg-slate-900 text-white">
-              <Sparkles className="h-3.5 w-3.5" />
-              CareerForge AI Preview
-            </Badge>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
-            <span className="inline-flex items-center gap-2"><Mail className="h-4 w-4" />{values.personal.email}</span>
-            <span className="inline-flex items-center gap-2"><Phone className="h-4 w-4" />{values.personal.phone}</span>
-            <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" />{values.personal.location}</span>
-          </div>
-        </div>
+    <section className="space-y-2">
+      <div>
+        <h2 className="text-[12px] font-semibold uppercase tracking-[0.16em]" style={{ color: "#475569" }}>
+          {title}
+        </h2>
+        <div className="mt-1 h-px" style={{ backgroundColor: "#e5e7eb" }} />
+      </div>
+      <div>{children}</div>
+    </section>
+  );
+}
 
-        <section>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Summary</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-700">{values.summary}</p>
-        </section>
+export function ResumePreview({ values, previewId = "resume-preview" }: { values: ResumeFormValues; previewId?: string }) {
+  const resume = normalizeResumeForPDF(values);
+  const contact = [resume.email, resume.phone, resume.location, resume.website, resume.github, resume.linkedin].filter(Boolean);
 
-        <section>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Experience</h2>
-          <div className="mt-4 space-y-5">
-            {values.experience.map((item) => (
-              <div key={item.id}>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold">{item.role}</h3>
-                    <p className="text-sm text-slate-600">{item.company}</p>
-                  </div>
-                  <p className="text-sm text-slate-500">{item.startDate} - {item.endDate}</p>
-                </div>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                  {item.bullets.map((bullet, index) => <li key={`${item.id}-${index}`}>{bullet}</li>)}
-                </ul>
+  return (
+    <div id={previewId} className="rounded-[28px] bg-[#08101c] p-4 sm:p-6">
+      <div
+        className="mx-auto w-full max-w-[820px] bg-white px-7 py-8 sm:px-10 sm:py-10"
+        style={{
+          minHeight: "1120px",
+          color: "#334155",
+          boxShadow: "0 28px 80px rgba(2, 6, 23, 0.28)",
+        }}
+      >
+        <div className="space-y-5">
+          <header className="pb-1">
+            <h1 className="text-[30px] font-bold leading-none tracking-[-0.02em]" style={{ color: "#0f172a" }}>
+              {resume.name}
+            </h1>
+            <p className="mt-1.5 text-[15px] font-medium leading-6" style={{ color: "#334155" }}>
+              {resume.role}
+            </p>
+            {contact.length ? (
+              <p className="mt-2 text-[11.5px] leading-5" style={{ color: "#64748b" }}>
+                {contact.join(" | ")}
+              </p>
+            ) : null}
+          </header>
+
+          <Section title="Summary">
+            <p className="text-[11.5px] leading-[1.55]" style={{ color: "#334155" }}>
+              {resume.summary}
+            </p>
+          </Section>
+
+          {resume.skillGroups.length ? (
+            <Section title="Technical Skills">
+              <div className="grid gap-1.5">
+                {resume.skillGroups.map((group) => (
+                  <p key={group.category} className="grid grid-cols-[88px_1fr] gap-2 text-[11.5px] leading-[1.5]">
+                    <span className="font-semibold" style={{ color: "#0f172a" }}>{group.category}:</span>
+                    <span style={{ color: "#334155" }}>{group.items.join(", ")}</span>
+                  </p>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </Section>
+          ) : null}
 
-        <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Education</h2>
-            <div className="mt-4 space-y-4 text-sm text-slate-700">
-              {values.education.map((item) => (
-                <div key={item.id}>
-                  <p className="font-semibold">{item.degree}</p>
-                  <p>{item.school}</p>
-                  <p className="text-slate-500">{item.year}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Skills</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {values.skills.map((skill) => (
-                <span key={skill} className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
+          {resume.experience.length ? (
+            <Section title="Experience">
+              <div className="space-y-4">
+                {resume.experience.map((item) => (
+                  <article key={item.id} className="space-y-1.5">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <div>
+                        <h3 className="text-[12.5px] font-semibold leading-[1.35]" style={{ color: "#0f172a" }}>{item.role}</h3>
+                        <p className="text-[11.5px] leading-[1.45]" style={{ color: "#334155" }}>{item.company}</p>
+                      </div>
+                      <p className="shrink-0 text-[11px] whitespace-nowrap leading-[1.35]" style={{ color: "#64748b" }}>
+                        {item.startDate} - {item.endDate}
+                      </p>
+                    </div>
+                    <ul className="space-y-1 pl-4 text-[11.5px] leading-[1.5]" style={{ color: "#334155" }}>
+                      {item.bullets.map((bullet, index) => (
+                        <li key={`${item.id}-${index}`} className="list-disc marker:text-slate-400">
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </Section>
+          ) : null}
+
+          {resume.projects.length ? (
+            <Section title="Projects">
+              <div className="space-y-4">
+                {resume.projects.map((project) => (
+                  <article key={project.id} className="space-y-1.5">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <h3 className="text-[12.5px] font-semibold leading-[1.35]" style={{ color: "#0f172a" }}>{project.name}</h3>
+                      {project.link ? (
+                        <p className="shrink-0 text-[11px] whitespace-nowrap leading-[1.35]" style={{ color: "#64748b" }}>
+                          {project.link}
+                        </p>
+                      ) : null}
+                    </div>
+                    <p className="text-[11.5px] leading-[1.5]" style={{ color: "#334155" }}>{project.description}</p>
+                    <p className="text-[11px] leading-[1.45]" style={{ color: "#64748b" }}>Tech Stack: {project.techStack}</p>
+                  </article>
+                ))}
+              </div>
+            </Section>
+          ) : null}
+
+          {resume.education.length ? (
+            <Section title="Education">
+              <div className="space-y-3">
+                {resume.education.map((item) => (
+                  <article key={item.id} className="flex items-baseline justify-between gap-4">
+                    <div>
+                      <h3 className="text-[12.5px] font-semibold leading-[1.35]" style={{ color: "#0f172a" }}>{item.degree}</h3>
+                      <p className="text-[11.5px] leading-[1.45]" style={{ color: "#334155" }}>{item.school}</p>
+                    </div>
+                    <p className="shrink-0 text-[11px] whitespace-nowrap leading-[1.35]" style={{ color: "#64748b" }}>{item.year}</p>
+                  </article>
+                ))}
+              </div>
+            </Section>
+          ) : null}
+
+          {resume.certifications.length ? (
+            <Section title="Certifications">
+              <ul className="space-y-1 pl-4 text-[11.5px] leading-[1.5]" style={{ color: "#334155" }}>
+                {resume.certifications.map((certification) => (
+                  <li key={certification} className="list-disc marker:text-slate-400">{certification}</li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
+        </div>
       </div>
     </div>
   );

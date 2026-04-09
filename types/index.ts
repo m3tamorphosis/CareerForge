@@ -5,6 +5,8 @@ export type ResumePersonal = {
   phone: string;
   location: string;
   website: string;
+  github?: string;
+  linkedin?: string;
 };
 
 export type ResumeExperienceItem = {
@@ -23,6 +25,19 @@ export type ResumeEducationItem = {
   year: string;
 };
 
+export type ResumeProjectItem = {
+  id: string;
+  name: string;
+  description: string;
+  techStack: string;
+  link?: string;
+};
+
+export type ResumeSkillGroup = {
+  category: string;
+  items: string[];
+};
+
 export type ResumeFormValues = {
   title: string;
   summary: string;
@@ -30,6 +45,9 @@ export type ResumeFormValues = {
   experience: ResumeExperienceItem[];
   education: ResumeEducationItem[];
   skills: string[];
+  projects?: ResumeProjectItem[];
+  certifications?: string[];
+  skillGroups?: ResumeSkillGroup[];
 };
 
 export type DashboardStats = {
