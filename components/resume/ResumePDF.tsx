@@ -20,9 +20,7 @@ function BulletList({ items }: { items: string[] }) {
     <div className="resume-pdf-bullets" role="list">
       {items.map((item, index) => (
         <div key={`${item}-${index}`} className="resume-pdf-bullet" role="listitem">
-          <span className="resume-pdf-bullet-marker" aria-hidden="true">
-            •
-          </span>
+          <span className="resume-pdf-bullet-marker" aria-hidden="true">&bull;</span>
           <span className="resume-pdf-bullet-text">{item}</span>
         </div>
       ))}
@@ -88,8 +86,7 @@ export function ResumePDF({ values }: ResumePDFProps) {
                     </div>
                     {project.link ? <p className="resume-pdf-entry-date">{project.link}</p> : null}
                   </div>
-                  <p className="resume-pdf-project-stack">Tech Stack: {project.techStack}</p>
-                </article>
+                                  </article>
               ))}
             </div>
           </Section>
@@ -116,6 +113,12 @@ export function ResumePDF({ values }: ResumePDFProps) {
         {resume.certifications.length ? (
           <Section title="Certifications">
             <BulletList items={resume.certifications} />
+          </Section>
+        ) : null}
+
+        {resume.references.length ? (
+          <Section title="References">
+            <BulletList items={resume.references} />
           </Section>
         ) : null}
       </article>

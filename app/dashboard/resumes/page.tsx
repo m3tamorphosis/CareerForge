@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ArrowLeft, X } from "lucide-react";
 
+import { deleteResumeFormAction } from "@/app/dashboard/actions";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,21 +14,36 @@ export default async function ResumesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-sm font-medium text-accent">Resumes</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Your resume workspaces</h1>
+      <div className="space-y-4">
+        <Button asChild variant="ghost" className="h-9 w-fit rounded-full border border-white/8 bg-white/[0.03] px-3 text-slate-200 hover:bg-white/[0.06] hover:text-white">
+          <Link href="/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Link>
+        </Button>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-medium text-accent">Resumes</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Your resume workspaces</h1>
+          </div>
+          <Button asChild variant="accent"><Link href="/dashboard/resumes/new">Create resume</Link></Button>
         </div>
-        <Button asChild variant="accent"><Link href="/dashboard/resumes/new">Create resume</Link></Button>
       </div>
 
       {resumes.length ? (
         <div className="grid gap-4 lg:grid-cols-2">
           {resumes.map((resume) => (
             <Card key={resume.id}>
-              <CardHeader>
-                <CardTitle>{resume.title}</CardTitle>
-                <CardDescription>Updated {new Date(resume.updatedAt).toLocaleDateString()}</CardDescription>
+              <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+                <div className="min-w-0">
+                  <CardTitle className="truncate">{resume.title}</CardTitle>
+                  <CardDescription>Updated {new Date(resume.updatedAt).toLocaleDateString()}</CardDescription>
+                </div>
+                <form action={deleteResumeFormAction.bind(null, resume.id)}>
+                  <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </form>
               </CardHeader>
               <CardContent>
                 <p className="line-clamp-2 text-sm text-muted-foreground">{resume.summary}</p>

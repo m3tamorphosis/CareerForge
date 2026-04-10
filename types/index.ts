@@ -47,6 +47,7 @@ export type ResumeFormValues = {
   skills: string[];
   projects?: ResumeProjectItem[];
   certifications?: string[];
+  references?: string[];
   skillGroups?: ResumeSkillGroup[];
 };
 

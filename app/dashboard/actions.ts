@@ -29,6 +29,21 @@ export async function saveResumeAction(input: { id?: string; values: unknown }) 
   const values = resumeSchema.parse(input.values);
   const slugBase = slugify(values.title);
   const slug = input.id ? slugBase : `${slugBase}-${Date.now()}`;
+  const normalizedProjects = (values.projects ?? [])
+    .map((project) => ({
+      ...project,
+      name: project.name?.trim() ?? "",
+      description: project.description?.trim() ?? "",
+      techStack: project.techStack?.trim() ?? "",
+      link: project.link?.trim() ?? "",
+    }))
+    .filter((project) => project.name || project.description || project.techStack || project.link);
+  const skillsPayload = {
+    items: values.skills,
+    projects: normalizedProjects,
+    certifications: values.certifications ?? [],
+    references: values.references ?? [],
+  };
 
   const resume = input.id
     ? await prisma.resume.update({
@@ -40,7 +55,7 @@ export async function saveResumeAction(input: { id?: string; values: unknown }) 
           personal: values.personal,
           experience: values.experience,
           education: values.education,
-          skills: values.skills,
+          skills: skillsPayload,
         },
       })
     : await prisma.resume.create({
@@ -51,7 +66,7 @@ export async function saveResumeAction(input: { id?: string; values: unknown }) 
           personal: values.personal,
           experience: values.experience,
           education: values.education,
-          skills: values.skills,
+          skills: skillsPayload,
           userId,
         },
       });
@@ -73,6 +88,10 @@ export async function deleteResumeAction(id: string) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/resumes");
   return { success: true };
+}
+
+export async function deleteResumeFormAction(id: string): Promise<void> {
+  await deleteResumeAction(id);
 }
 
 export async function saveCoverLetterAction(input: { id?: string; values: unknown; content: string }) {

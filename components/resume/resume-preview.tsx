@@ -70,8 +70,9 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
     }))
     .filter((item) => item.degree || item.school || item.year);
   const certifications = resume.certifications.filter((item) => hasText(item));
+  const references = resume.references.filter((item) => hasText(item));
   const hasHeader = hasText(resume.name) || hasText(resume.role) || contact.length;
-  const hasContent = hasHeader || summary || skills.length || experience.length || projects.length || education.length || certifications.length;
+  const hasContent = hasHeader || summary || skills.length || experience.length || projects.length || education.length || certifications.length || references.length;
 
   useEffect(() => {
     const element = shellRef.current;
@@ -250,6 +251,16 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
                       <ul className="space-y-1 pl-4 text-[11.5px] leading-[1.5]" style={{ color: "#000000" }}>
                         {certifications.map((certification) => (
                           <li key={certification} className="list-disc marker:text-black">{certification}</li>
+                        ))}
+                      </ul>
+                    </Section>
+                  ) : null}
+
+                  {references.length ? (
+                    <Section title="References">
+                      <ul className="space-y-1 pl-4 text-[11.5px] leading-[1.5]" style={{ color: "#000000" }}>
+                        {references.map((reference) => (
+                          <li key={reference} className="list-disc marker:text-black">{reference}</li>
                         ))}
                       </ul>
                     </Section>

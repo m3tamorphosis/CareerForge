@@ -50,48 +50,38 @@ export const featureComparison = [
 ];
 
 export const defaultResume: ResumeFormValues = {
-  title: "Senior Product Designer Resume",
-  summary:
-    "Strategic product designer with 6+ years building polished, high-converting experiences across SaaS and growth products.",
+  title: "",
+  summary: "",
   personal: {
-    fullName: "Alex Morgan",
-    role: "Senior Product Designer",
-    email: "alex@careerforge.ai",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    website: "portfolio.example.com",
+    fullName: "",
+    role: "",
+    email: "",
+    phone: "",
+    location: "",
+    website: "",
+    github: "",
+    linkedin: "",
   },
   experience: [
     {
       id: "exp-1",
-      company: "Northstar Labs",
-      role: "Senior Product Designer",
-      startDate: "2022",
-      endDate: "Present",
-      bullets: [
-        "Led redesign of onboarding flows that improved activation by 26% across self-serve accounts.",
-        "Partnered with engineering and growth to ship experimentation frameworks for lifecycle conversion.",
-      ],
-    },
-    {
-      id: "exp-2",
-      company: "Baseline Studio",
-      role: "Product Designer",
-      startDate: "2019",
-      endDate: "2022",
-      bullets: [
-        "Designed core collaboration surfaces used by 50k+ weekly active users.",
-        "Built a scalable design system that reduced design-to-dev cycle time by 30%.",
-      ],
+      company: "",
+      role: "",
+      startDate: "",
+      endDate: "",
+      bullets: [""],
     },
   ],
   education: [
     {
       id: "edu-1",
-      school: "California College of the Arts",
-      degree: "BFA, Interaction Design",
-      year: "2019",
+      school: "",
+      degree: "",
+      year: "",
     },
   ],
-  skills: ["Product Strategy", "Design Systems", "Figma", "User Research", "Prototyping", "Cross-functional Leadership"],
+  skills: [],
+  projects: [],
+  certifications: [],
+  references: [],
 };

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, BrainCircuit, FilePlus2, PenSquare } from "lucide-react";
+import { ArrowRight, BrainCircuit, FilePlus2, PenSquare, X } from "lucide-react";
 
+import { deleteResumeFormAction } from "@/app/dashboard/actions";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { getDashboardData, requireUser } from "@/lib/data";
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const { resumes, coverLetters, applications, usage, stats } = await getDashboardData(user.id);
+  const { resumes, applications, usage, stats } = await getDashboardData(user.id);
 
   return (
     <div className="space-y-6">
@@ -45,13 +46,28 @@ export default async function DashboardPage() {
             {resumes.length ? (
               <div className="space-y-4">
                 {resumes.map((resume) => (
-                  <Link key={resume.id} href={`/dashboard/resumes/${resume.id}`} className="flex items-center justify-between rounded-[24px] border border-border/70 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:shadow-lg">
-                    <div>
-                      <p className="font-medium">{resume.title}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">Updated {new Date(resume.updatedAt).toLocaleDateString()}</p>
+                  <div key={resume.id} className="flex items-center justify-between gap-3 rounded-[24px] border border-border/70 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:shadow-lg">
+                    <Link href={`/dashboard/resumes/${resume.id}`} className="min-w-0 flex-1">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{resume.title}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">Updated {new Date(resume.updatedAt).toLocaleDateString()}</p>
+                      </div>
+                    </Link>
+                    <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border/70 bg-muted/35 p-1">
+                      <Link
+                        href={`/dashboard/resumes/${resume.id}`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-background/80 hover:text-foreground"
+                        aria-label={`Open ${resume.title}`}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                      <form action={deleteResumeFormAction.bind(null, resume.id)}>
+                        <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label={`Delete ${resume.title}`}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </form>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  </Link>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -66,10 +82,10 @@ export default async function DashboardPage() {
               <CardTitle>Quick actions</CardTitle>
               <CardDescription>Jump straight into the highest-leverage workflows.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3">
-              <Button asChild variant="outline" className="justify-between"><Link href="/dashboard/resumes/new"><span className="inline-flex items-center gap-2"><FilePlus2 className="h-4 w-4" />New resume</span><ArrowRight className="h-4 w-4" /></Link></Button>
-              <Button asChild variant="outline" className="justify-between"><Link href="/dashboard/cover-letters"><span className="inline-flex items-center gap-2"><PenSquare className="h-4 w-4" />Generate letter</span><ArrowRight className="h-4 w-4" /></Link></Button>
-              <Button asChild variant="outline" className="justify-between"><Link href="/dashboard/job-tracker"><span className="inline-flex items-center gap-2"><BrainCircuit className="h-4 w-4" />Track applications</span><ArrowRight className="h-4 w-4" /></Link></Button>
+            <CardContent className="flex flex-wrap gap-3">
+              <Button asChild variant="outline" className="w-[220px] justify-between bg-slate-950/55 hover:bg-slate-900/80"><Link href="/dashboard/resumes/new"><span className="inline-flex items-center gap-2"><FilePlus2 className="h-4 w-4" />New resume</span><ArrowRight className="h-4 w-4" /></Link></Button>
+              <Button asChild variant="outline" className="w-[220px] justify-between bg-slate-950/55 hover:bg-slate-900/80"><Link href="/dashboard/cover-letters"><span className="inline-flex items-center gap-2"><PenSquare className="h-4 w-4" />Generate letter</span><ArrowRight className="h-4 w-4" /></Link></Button>
+              <Button asChild variant="outline" className="w-[220px] justify-between bg-slate-950/55 hover:bg-slate-900/80"><Link href="/dashboard/job-tracker"><span className="inline-flex items-center gap-2"><BrainCircuit className="h-4 w-4" />Track applications</span><ArrowRight className="h-4 w-4" /></Link></Button>
             </CardContent>
           </Card>
 
@@ -79,8 +95,8 @@ export default async function DashboardPage() {
               <CardDescription>Your current workspace activity.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <div className="flex items-center justify-between"><span>Resumes created</span><span className="font-medium text-foreground">{formatNumber(usage?.resumesCreated ?? 0)}</span></div>
-              <div className="flex items-center justify-between"><span>Cover letters created</span><span className="font-medium text-foreground">{formatNumber(usage?.coverLettersCreated ?? 0)}</span></div>
+              <div className="flex items-center justify-between"><span>Resumes</span><span className="font-medium text-foreground">{formatNumber(stats.resumes)}</span></div>
+              <div className="flex items-center justify-between"><span>Cover letters</span><span className="font-medium text-foreground">{formatNumber(stats.coverLetters)}</span></div>
               <div className="flex items-center justify-between"><span>Bullet improvements</span><span className="font-medium text-foreground">{formatNumber(usage?.bulletImprovements ?? 0)}</span></div>
             </CardContent>
           </Card>

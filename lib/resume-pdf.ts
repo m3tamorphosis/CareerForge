@@ -16,12 +16,14 @@ type ResumePDFData = {
   projects: ResumeProjectItem[];
   education: ResumeFormValues["education"];
   certifications: string[];
+  references: string[];
 };
 
 export function normalizeResumeForPDF(values: ResumeFormValues): ResumePDFData {
   const extra = values as ResumeFormValues & {
     projects?: ResumeProjectItem[];
     certifications?: string[];
+    references?: string[];
     skillGroups?: ResumeSkillGroup[];
   };
 
@@ -41,5 +43,6 @@ export function normalizeResumeForPDF(values: ResumeFormValues): ResumePDFData {
     projects: extra.projects ?? [],
     education: values.education,
     certifications: extra.certifications ?? [],
+    references: extra.references ?? [],
   };
 }

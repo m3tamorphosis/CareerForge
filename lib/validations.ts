@@ -13,6 +13,8 @@ const personalSchema = z.object({
   phone: z.string().min(6),
   location: z.string().min(2),
   website: z.string().optional().default(""),
+  github: z.string().optional().default(""),
+  linkedin: z.string().optional().default(""),
 });
 
 const experienceSchema = z.object({
@@ -31,6 +33,14 @@ const educationSchema = z.object({
   year: z.string().min(2),
 });
 
+const projectSchema = z.object({
+  id: z.string(),
+  name: z.string().optional().default(""),
+  description: z.string().optional().default(""),
+  techStack: z.string().optional().default(""),
+  link: z.string().optional().default(""),
+});
+
 export const resumeSchema = z.object({
   title: z.string().min(3, "Resume title is required."),
   summary: z.string().min(20, "Add a short professional summary."),
@@ -38,6 +48,9 @@ export const resumeSchema = z.object({
   experience: z.array(experienceSchema).min(1, "Add at least one experience entry."),
   education: z.array(educationSchema).min(1, "Add at least one education entry."),
   skills: z.array(z.string().min(2)).min(1, "Add at least one skill."),
+  projects: z.array(projectSchema).optional().default([]),
+  certifications: z.array(z.string().min(2)).optional().default([]),
+  references: z.array(z.string().min(2)).optional().default([]),
 });
 
 export const jobApplicationSchema = z.object({

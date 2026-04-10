@@ -53,6 +53,7 @@ type SectionProps = {
 };
 
 function EditorSection({ eyebrow, title, description, actions, children, className }: SectionProps) {
+
   return (
     <section className={cn("space-y-5 border-t border-white/6 pt-8 first:border-t-0 first:pt-0", className)}>
       <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -248,6 +249,24 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
     });
   };
 
+  const updateProject = (index: number, field: keyof NonNullable<ResumeFormValues["projects"]>[number], value: string) => {
+    setValues((current) => {
+      const next = [...(current.projects ?? [])];
+      next[index] = { ...next[index], [field]: value };
+      return { ...current, projects: next };
+    });
+  };
+
+  const updateCertifications = (input: string) => {
+    const nextCertifications = parseSkillsInput(input);
+    setValues((current) => ({ ...current, certifications: nextCertifications }));
+  };
+
+  const updateReferences = (input: string) => {
+    const nextReferences = parseSkillsInput(input);
+    setValues((current) => ({ ...current, references: nextReferences }));
+  };
+
   return (
     <>
       <div className="grid gap-6 2xl:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)] xl:grid-cols-[minmax(0,1fr)_minmax(440px,0.98fr)]">
@@ -335,8 +354,11 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                   <Field label="Location">
                     <Input className={fieldClass} value={values.personal.location} onChange={(e) => setValues({ ...values, personal: { ...values.personal, location: e.target.value } })} />
                   </Field>
-                  <Field label="Website">
+                  <Field label="Website / Portfolio">
                     <Input className={fieldClass} value={values.personal.website} onChange={(e) => setValues({ ...values, personal: { ...values.personal, website: e.target.value } })} />
+                  </Field>
+                  <Field label="GitHub (optional)">
+                    <Input className={fieldClass} value={values.personal.github ?? ""} onChange={(e) => setValues({ ...values, personal: { ...values.personal, github: e.target.value } })} />
                   </Field>
                   <Field label="Professional summary" className="md:col-span-2">
                     <Textarea className={cn(textareaClass, "min-h-[128px]")} value={values.summary} onChange={(e) => setValues({ ...values, summary: e.target.value })} />
@@ -388,6 +410,79 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                     />
                   ))}
                 </div>
+              </EditorSection>
+
+              <EditorSection
+                eyebrow="Projects"
+                title="Projects"
+                description="Optional, but helpful when a project shows relevant impact or ownership more clearly than a job entry."
+                actions={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={tertiaryButtonClass}
+                    onClick={() =>
+                      setValues((current) => ({
+                        ...current,
+                        projects: [
+                          ...(current.projects ?? []),
+                          { id: crypto.randomUUID(), name: "", description: "", techStack: "", link: "" },
+                        ],
+                      }))
+                    }
+                  >
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
+                    Add project
+                  </Button>
+                }
+              >
+                {(values.projects ?? []).length ? (
+                  <div className="space-y-4">
+                    {(values.projects ?? []).map((project, index) => (
+                      <div key={project.id} className="rounded-[20px] bg-white/[0.02] px-4 py-4 ring-1 ring-white/5">
+                        <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Project {index + 1} (optional)</p>
+                            <p className="mt-1 text-sm text-slate-300">Add a focused project only if it strengthens the story of this resume.</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className={subtleActionClass}
+                            onClick={() =>
+                              setValues((current) => ({
+                                ...current,
+                                projects: (current.projects ?? []).filter((item) => item.id !== project.id),
+                              }))
+                            }
+                          >
+                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                            Remove project
+                          </Button>
+                        </div>
+
+                        <div className="mt-5 grid gap-4 md:grid-cols-2">
+                          <Field label="Project name">
+                            <Input className={fieldClass} value={project.name} onChange={(e) => updateProject(index, "name", e.target.value)} />
+                          </Field>
+                          <Field label="Link (optional)">
+                            <Input className={fieldClass} value={project.link ?? ""} onChange={(e) => updateProject(index, "link", e.target.value)} />
+                          </Field>
+                          <Field label="Description" className="md:col-span-2">
+                            <Textarea className={cn(textareaClass, "min-h-[96px]")} value={project.description} onChange={(e) => updateProject(index, "description", e.target.value)} />
+                          </Field>
+                          
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-white/8 bg-white/[0.02] px-4 py-5 text-sm text-slate-400">
+                    No projects added yet. This section is optional.
+                  </div>
+                )}
               </EditorSection>
 
               <div className="grid gap-6 2xl:grid-cols-[minmax(0,0.98fr)_minmax(0,1.02fr)]">
@@ -481,6 +576,46 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                     ) : null}
                   </div>
                 </EditorSection>
+              <EditorSection
+                eyebrow="Supporting"
+                title="Certifications"
+                description="Optional. Add certifications only when they strengthen the role you are targeting."
+              >
+                <div className="space-y-3.5">
+                  <Field
+                    label="Certifications (optional)"
+                    hint="Use one certification per line."
+                  >
+                    <Textarea
+                      className={cn(textareaClass, "min-h-[120px]")}
+                      value={(values.certifications ?? []).join("\n")}
+                      placeholder="Google UX Design Certificate"
+                      onChange={(e) => updateCertifications(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              </EditorSection>
+
+              <EditorSection
+                eyebrow="Supporting"
+                title="References"
+                description="Optional. Add references only if you specifically want them included on the resume."
+              >
+                <div className="space-y-3.5">
+                  <Field
+                    label="References (optional)"
+                    hint="Use one reference line per entry, for example: Jane Doe - Engineering Manager - jane@company.com"
+                  >
+                    <Textarea
+                      className={cn(textareaClass, "min-h-[120px]")}
+                      value={(values.references ?? []).join("\n")}
+                      placeholder="Jane Doe - Engineering Manager - jane@company.com"
+                      onChange={(e) => updateReferences(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              </EditorSection>
+
               </div>
             </div>
           </div>
