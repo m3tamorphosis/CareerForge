@@ -42,12 +42,7 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
   const [pageOffsetY, setPageOffsetY] = useState(0);
 
   const summary = resume.summary?.trim() ?? "";
-  const skillGroups = resume.skillGroups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) => hasText(item)),
-    }))
-    .filter((group) => hasText(group.category) && group.items.length);
+  const skills = resume.skills.filter((skill) => hasText(skill));
   const experience = resume.experience
     .map((item) => ({
       ...item,
@@ -77,7 +72,7 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
     .filter((item) => item.degree || item.school || item.year);
   const certifications = resume.certifications.filter((item) => hasText(item));
   const hasHeader = hasText(resume.name) || hasText(resume.role) || contact.length;
-  const hasContent = hasHeader || summary || skillGroups.length || experience.length || projects.length || education.length || certifications.length;
+  const hasContent = hasHeader || summary || skills.length || experience.length || projects.length || education.length || certifications.length;
 
   useEffect(() => {
     const element = shellRef.current;
@@ -155,7 +150,6 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
                   </header>
                 ) : null}
 
-
                 {summary ? (
                   <Section title="Summary">
                     <p className="text-[11.5px] leading-[1.55]" style={{ color: "#000000" }}>
@@ -164,13 +158,12 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
                   </Section>
                 ) : null}
 
-                {skillGroups.length ? (
-                  <Section title="Technical Skills">
-                    <div className="grid gap-1.5">
-                      {skillGroups.map((group) => (
-                        <p key={group.category} className="grid grid-cols-[88px_1fr] gap-2 text-[11.5px] leading-[1.5]">
-                          <span className="font-semibold" style={{ color: "#000000" }}>{group.category}:</span>
-                          <span style={{ color: "#000000" }}>{group.items.join(", ")}</span>
+                {skills.length ? (
+                  <Section title="Core Skills">
+                    <div className="space-y-1">
+                      {skills.map((skill) => (
+                        <p key={skill} className="text-[11.5px] leading-[1.55]" style={{ color: "#000000" }}>
+                          {skill}
                         </p>
                       ))}
                     </div>
@@ -273,9 +266,4 @@ export function ResumePreview({ values, previewId = "resume-preview", mode = "pa
     </div>
   );
 }
-
-
-
-
-
 

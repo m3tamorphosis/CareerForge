@@ -3,7 +3,7 @@
 import { Expand, FileText, Loader2, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useDeferredValue, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useState, useTransition } from "react";
 
 import { saveResumeAction } from "@/app/dashboard/actions";
 import { ResumePreview } from "@/components/resume/resume-preview";
@@ -33,6 +33,15 @@ const subtleActionClass =
   "h-8 shrink-0 rounded-full px-3 text-xs text-slate-400 hover:bg-white/[0.05] hover:text-slate-100";
 const aiActionClass =
   "h-7 shrink-0 rounded-full border border-white/6 bg-white/[0.02] px-2 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white";
+const skillChipClass =
+  "inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/6 bg-white/[0.03] px-2.5 py-1 text-xs text-slate-300";
+
+function parseSkillsInput(input: string) {
+  return input
+    .split(/\n+/)
+    .map((skill) => skill.trim())
+    .filter(Boolean);
+}
 
 type SectionProps = {
   eyebrow?: string;
@@ -204,6 +213,7 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
   const [aiLoadingKey, setAiLoadingKey] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [previewExpanded, setPreviewExpanded] = useState(false);
+  const [skillsInput, setSkillsInput] = useState(initialData.skills.join(", "));
 
   const updateExperience = (index: number, field: keyof ResumeFormValues["experience"][number], value: string | string[]) => {
     setValues((current) => {
@@ -212,6 +222,21 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
       return { ...current, experience: next };
     });
   };
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const nextSkills = parseSkillsInput(skillsInput);
+      setValues((current) => {
+        if (current.skills.length === nextSkills.length && current.skills.every((skill, index) => skill === nextSkills[index])) {
+          return current;
+        }
+
+        return { ...current, skills: nextSkills };
+      });
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [skillsInput]);
 
   const updateEducation = (index: number, field: keyof ResumeFormValues["education"][number], value: string) => {
     setValues((current) => {
@@ -407,35 +432,53 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                 </EditorSection>
 
                 <EditorSection
-                  eyebrow="Keywords"
-                  title="Skills"
-                  description="Keep the list recruiter-readable and easy to regroup later."
+                  eyebrow="Capabilities"
+                  title="Core Skills"
+                  description="Add the main skills, strengths, or tools that are most relevant to your target role."
                   className="border-t-0 pt-0"
                 >
                   <div className="min-w-0 space-y-3.5">
-                    <Field label="Core skills">
+                    <Field
+                      label="Skills, strengths, or tools"
+                      hint="Use one line per skill group or list, or keep everything on one line if you prefer."
+                    >
                       <Textarea
                         className={cn(textareaClass, "min-h-[150px]")}
-                        value={values.skills.join(", ")}
-                        onChange={(e) =>
-                          setValues({
-                            ...values,
-                            skills: e.target.value.split(",").map((skill) => skill.trim()).filter(Boolean),
-                          })
-                        }
+                        value={skillsInput}
+                        placeholder="Communication, Leadership, Project Management, Excel"
+                        onChange={(e) => {
+                          setSkillsInput(e.target.value);
+                        }}
+                        onBlur={() => {
+                          const normalizedSkills = parseSkillsInput(skillsInput);
+                          setValues((current) => ({ ...current, skills: normalizedSkills }));
+                        }}
                       />
                     </Field>
-                    <p className="text-xs leading-5 text-slate-500">Example: TypeScript, Next.js, PostgreSQL, Product Strategy</p>
-                    {values.skills.length ? (
+                    <p className="text-xs leading-5 text-slate-500">Examples: Communication, Leadership, Project Management, Excel, Customer Service, CRM, Figma, React</p>
+                    {parseSkillsInput(skillsInput).length ? (
                       <div className="flex flex-wrap gap-2">
-                        {values.skills.slice(0, 16).map((skill) => (
-                          <span
+                        {parseSkillsInput(skillsInput).slice(0, 16).map((skill) => (
+                          <button
                             key={skill}
-                            className="rounded-full border border-white/6 bg-white/[0.03] px-2.5 py-1 text-xs text-slate-300"
+                            type="button"
+                            className={cn(skillChipClass, "text-left")}
+                            onClick={() => {
+                              const nextSkills = parseSkillsInput(skillsInput).filter((item) => item !== skill);
+                              const nextInput = nextSkills.join(", ");
+                              setSkillsInput(nextInput);
+                              setValues((current) => ({ ...current, skills: nextSkills }));
+                            }}
                           >
-                            {skill}
-                          </span>
+                            <span className="min-w-0 break-words">{skill}</span>
+                            <X className="h-3 w-3 shrink-0 text-slate-400" />
+                          </button>
                         ))}
+                        {parseSkillsInput(skillsInput).length > 16 ? (
+                          <span className={skillChipClass}>
+                            +{parseSkillsInput(skillsInput).length - 16} more
+                          </span>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -500,5 +543,12 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
     </>
   );
 }
+
+
+
+
+
+
+
 
 

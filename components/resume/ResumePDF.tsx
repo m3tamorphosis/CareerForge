@@ -32,14 +32,11 @@ export function ResumePDF({ values }: ResumePDFProps) {
           <p className="resume-pdf-summary">{resume.summary}</p>
         </Section>
 
-        {resume.skillGroups.length ? (
-          <Section title="Technical Skills">
+        {resume.skills.length ? (
+          <Section title="Core Skills">
             <div className="resume-pdf-skill-groups">
-              {resume.skillGroups.map((group) => (
-                <p key={group.category} className="resume-pdf-skill-line">
-                  <span className="resume-pdf-skill-label">{group.category}:</span>
-                  <span className="resume-pdf-skill-value">{group.items.join(", ")}</span>
-                </p>
+              {resume.skills.map((skill) => (
+                <p key={skill} className="resume-pdf-summary">{skill}</p>
               ))}
             </div>
           </Section>
@@ -118,5 +115,4 @@ export function ResumePDF({ values }: ResumePDFProps) {
     </div>
   );
 }
-
 

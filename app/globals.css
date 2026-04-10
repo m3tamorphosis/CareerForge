@@ -93,6 +93,59 @@ select {
   background: rgba(56, 189, 248, 0.22);
 }
 
+html,
+body,
+textarea,
+*[class*="overflow"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.55) rgba(2, 6, 23, 0.92);
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.92);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.55);
+  border: 3px solid rgba(2, 6, 23, 0.92);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.72);
+}
+
+*::-webkit-scrollbar-corner {
+  background: rgba(2, 6, 23, 0.92);
+}
+
+.dark,
+.dark * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.55) rgba(2, 6, 23, 0.92);
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.92);
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.55);
+  border-color: rgba(2, 6, 23, 0.92);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.72);
+}
+
+.dark *::-webkit-scrollbar-corner {
+  background: rgba(2, 6, 23, 0.92);
+}
 .glass {
   @apply border border-white/10 bg-white/60 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:bg-slate-950/50;
 }
@@ -328,5 +381,6 @@ select {
     border-radius: 0 !important;
   }
 }
+
 
 
