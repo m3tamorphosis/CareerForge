@@ -1,9 +1,9 @@
 "use client";
 
-import { Expand, FileText, Loader2, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Expand, FileText, Loader2, Minus, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 
 import { saveResumeAction } from "@/app/dashboard/actions";
 import { ResumePreview } from "@/components/resume/resume-preview";
@@ -213,7 +213,9 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
   const [aiLoadingKey, setAiLoadingKey] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [previewExpanded, setPreviewExpanded] = useState(false);
+  const [previewZoom, setPreviewZoom] = useState(1);
   const [skillsInput, setSkillsInput] = useState(initialData.skills.join(", "));
+  const parsedSkills = useMemo(() => parseSkillsInput(skillsInput), [skillsInput]);
 
   const updateExperience = (index: number, field: keyof ResumeFormValues["experience"][number], value: string | string[]) => {
     setValues((current) => {
@@ -456,16 +458,16 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                       />
                     </Field>
                     <p className="text-xs leading-5 text-slate-500">Examples: Communication, Leadership, Project Management, Excel, Customer Service, CRM, Figma, React</p>
-                    {parseSkillsInput(skillsInput).length ? (
+                    {parsedSkills.length ? (
                       <div className="flex flex-wrap gap-2">
-                        {parseSkillsInput(skillsInput).slice(0, 16).map((skill) => (
+                        {parsedSkills.slice(0, 16).map((skill, index) => (
                           <button
-                            key={skill}
+                            key={`${skill}-${index}`}
                             type="button"
                             className={cn(skillChipClass, "text-left")}
                             onClick={() => {
-                              const nextSkills = parseSkillsInput(skillsInput).filter((item) => item !== skill);
-                              const nextInput = nextSkills.join(", ");
+                              const nextSkills = parsedSkills.filter((_, itemIndex) => itemIndex !== index);
+                              const nextInput = nextSkills.join("\n");
                               setSkillsInput(nextInput);
                               setValues((current) => ({ ...current, skills: nextSkills }));
                             }}
@@ -474,11 +476,7 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
                             <X className="h-3 w-3 shrink-0 text-slate-400" />
                           </button>
                         ))}
-                        {parseSkillsInput(skillsInput).length > 16 ? (
-                          <span className={skillChipClass}>
-                            +{parseSkillsInput(skillsInput).length - 16} more
-                          </span>
-                        ) : null}
+                        {parsedSkills.length > 16 ? <span className={skillChipClass}>+{parsedSkills.length - 16} more</span> : null}
                       </div>
                     ) : null}
                   </div>
@@ -518,24 +516,58 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
       {previewExpanded ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/88 p-4 backdrop-blur-md sm:p-6">
           <div className="flex h-full w-full max-w-[1600px] flex-col rounded-[32px] border border-white/10 bg-slate-950/92 shadow-[0_30px_120px_rgba(2,6,23,0.5)]">
-            <div className="flex items-center justify-between gap-4 border-b border-white/8 px-5 py-4 sm:px-6">
+            <div className="flex flex-col gap-4 border-b border-white/8 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-white">Focus preview</h2>
                 <p className="text-sm text-slate-400">A larger, live-updating view of the same exported resume page.</p>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-9 shrink-0 rounded-full px-3 text-slate-300 hover:bg-white/[0.05] hover:text-white"
-                onClick={() => setPreviewExpanded(false)}
-              >
-                <X className="mr-1.5 h-4 w-4" />
-                Close
-              </Button>
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                <div className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.03] p-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                    onClick={() => setPreviewZoom((current) => Math.max(0.8, Number((current - 0.1).toFixed(2))))}
+                    disabled={previewZoom <= 0.8}
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </Button>
+                  <span className="min-w-[4.25rem] text-center text-xs font-medium text-slate-300">{Math.round(previewZoom * 100)}%</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                    onClick={() => setPreviewZoom((current) => Math.min(1.6, Number((current + 0.1).toFixed(2))))}
+                    disabled={previewZoom >= 1.6}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 rounded-full px-3 text-slate-300 hover:bg-white/[0.05] hover:text-white"
+                  onClick={() => setPreviewZoom(1)}
+                >
+                  Reset zoom
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 shrink-0 rounded-full px-3 text-slate-300 hover:bg-white/[0.05] hover:text-white"
+                  onClick={() => setPreviewExpanded(false)}
+                >
+                  <X className="mr-1.5 h-4 w-4" />
+                  Close
+                </Button>
+              </div>
             </div>
-            <div className="min-h-0 flex-1 p-4 sm:p-6">
-              <ResumePreview values={deferredValues} mode="focus" previewId="resume-preview-focus" />
+            <div className="min-h-0 flex-1 p-3 sm:p-4 md:p-5">
+              <ResumePreview values={deferredValues} mode="focus" previewId="resume-preview-focus" zoomLevel={previewZoom} />
             </div>
           </div>
         </div>
@@ -543,12 +575,3 @@ export function ResumeEditor({ initialData, resumeId }: { initialData: ResumeFor
     </>
   );
 }
-
-
-
-
-
-
-
-
-

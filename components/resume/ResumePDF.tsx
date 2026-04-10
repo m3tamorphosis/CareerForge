@@ -15,6 +15,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <div className="resume-pdf-bullets" role="list">
+      {items.map((item, index) => (
+        <div key={`${item}-${index}`} className="resume-pdf-bullet" role="listitem">
+          <span className="resume-pdf-bullet-marker" aria-hidden="true">
+            •
+          </span>
+          <span className="resume-pdf-bullet-text">{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ResumePDF({ values }: ResumePDFProps) {
   const resume = normalizeResumeForPDF(values);
   const contact = [resume.email, resume.phone, resume.location, resume.website, resume.github, resume.linkedin].filter(Boolean);
@@ -54,11 +69,7 @@ export function ResumePDF({ values }: ResumePDFProps) {
                     </div>
                     <p className="resume-pdf-entry-date">{item.startDate} - {item.endDate}</p>
                   </div>
-                  <ul className="resume-pdf-bullets">
-                    {item.bullets.map((bullet, index) => (
-                      <li key={`${item.id}-${index}`}>{bullet}</li>
-                    ))}
-                  </ul>
+                  <BulletList items={item.bullets} />
                 </article>
               ))}
             </div>
@@ -104,15 +115,10 @@ export function ResumePDF({ values }: ResumePDFProps) {
 
         {resume.certifications.length ? (
           <Section title="Certifications">
-            <ul className="resume-pdf-bullets resume-pdf-certifications">
-              {resume.certifications.map((certification) => (
-                <li key={certification}>{certification}</li>
-              ))}
-            </ul>
+            <BulletList items={resume.certifications} />
           </Section>
         ) : null}
       </article>
     </div>
   );
 }
-

@@ -201,16 +201,31 @@ export const resumePdfStyles = `
   }
 
   .resume-pdf-bullets {
+    display: grid;
+    gap: 4px;
     margin: 6px 0 0;
-    padding-left: 16px;
   }
 
-  .resume-pdf-bullets li {
+  .resume-pdf-bullet {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 6px;
     color: #000000;
-    margin: 0 0 4px;
     line-height: 1.5;
     page-break-inside: avoid;
     break-inside: avoid;
+  }
+
+  .resume-pdf-bullet-marker {
+    display: block;
+    font-size: 11.5px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .resume-pdf-bullet-text {
+    display: block;
   }
 
   .resume-pdf-project-description {
@@ -235,11 +250,3 @@ export const resumePdfStyles = `
     break-inside: avoid;
   }
 `;
-
-
-
-
-
-
-
-
